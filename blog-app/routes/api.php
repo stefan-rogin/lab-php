@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FetchPostsController;
 
 // TODO: change to post
-Route::get('/loadPosts', function() {
-    return response()->json(['message' => 'helloo'], 200);
-});
+Route::get('/fetchPosts', [FetchPostsController::class, 'fetchPosts']);
