@@ -6,10 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Services\PostService;
 
-class FetchPostsController extends Controller
+class PostController extends Controller
 {
     public function fetchPosts(Request $request) {
         // TODO: move to config
+        // TODO: Move logic to service
         $service = new PostService('https://api.vercel.app/blog');
         $data = $service->fetchPosts();
         if (is_array($data)) {

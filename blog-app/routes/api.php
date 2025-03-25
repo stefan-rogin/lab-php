@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FetchPostsController;
+use App\Http\Controllers\PostController;
 
 // TODO: change to post
-Route::get('/fetchPosts', [FetchPostsController::class, 'fetchPosts']);
+Route::get('/fetchPosts', [PostController::class, 'fetchPosts']);
