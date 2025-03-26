@@ -31,4 +31,8 @@ class PostController extends Controller
         }
         return response()->json(['error' => 'Unable to fetch posts.'], 500);
     }
+
+    public function list() {
+        return Post::all();
+    }
 }
