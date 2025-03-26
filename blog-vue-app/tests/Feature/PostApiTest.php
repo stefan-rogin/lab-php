@@ -32,7 +32,7 @@ test('fetches and stores valid posts', function() {
         'https://api.vercel.app/blog' => Http::response($fakeResponsePosts, 200),
     ]);
 
-    $this->get('/api/fetchPosts')->assertOk();
+    $this->post('/api/fetchPosts')->assertOk();
     
     $this->assertDatabaseCount('posts', 3);
     foreach ($fakeResponsePosts as $fakePost) {
@@ -69,7 +69,7 @@ test('fetches and stores valid posts, skipping invalid posts', function() {
     Http::fake([
         'https://api.vercel.app/blog' => Http::response(json_encode([$validPost, $invalidPost]), 200),
     ]);
-    $this->get('/api/fetchPosts')->assertOk();
+    $this->post('/api/fetchPosts')->assertOk();
 
     $this->assertDatabaseCount('posts', 1)
         ->assertDatabaseHas('posts', [
@@ -86,7 +86,7 @@ test('responds with error when service fails', function() {
     Http::fake([
         'https://api.vercel.app/blog' => Http::response('', 500),
     ]);
-    $this->get('/api/fetchPosts')->assertServerError();
+    $this->post('/api/fetchPosts')->assertServerError();
 });
 
 test('responds with fetched posts and category', function() {
