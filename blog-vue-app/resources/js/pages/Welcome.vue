@@ -17,7 +17,7 @@ const isLoading = ref(false);
 const fetchStoredPosts = async () => {
     await fetch("/api")
         .then(res => res.json())
-        .then(data => { posts.value = data })
+        .then(({ data }) => { posts.value = data })
         .catch(e => console.error("Failed to fetch posts: ", e));
 
 };

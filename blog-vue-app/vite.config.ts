@@ -33,7 +33,4 @@ export default defineConfig({
             plugins: [tailwindcss, autoprefixer],
         },
     },
-    server: {
-        cors: true,
-    },
 });

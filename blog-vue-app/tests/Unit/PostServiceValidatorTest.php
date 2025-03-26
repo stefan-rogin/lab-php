@@ -1,23 +1,24 @@
 <?php
 
 use App\Services\PostService;
+use App\Http\Resources\PostResource;
 
 uses(Tests\TestCase::class);
 
 test('validates ok posts', function () {
-    $validPost = [
+    $validPost = new PostResource([
         'id' => 4,
         'title' => 'Valid title',
         'content' => 'Something',
         'author' => 'Sarah Johnson',
         'category' => 'Code',
         'date' => '2025-03-26',
-    ];
+    ]);
     expect(PostService::isValidPost($validPost))->toBeTrue();
 });
 
 test('invalidates posts missing required fields', function () {
-    $invalidPosts = [[
+    $invalidPosts = collect([[
         'id' => NULL, // No Id
         'title' => 'Valid title',
         'content' => 'Something',
@@ -59,16 +60,17 @@ test('invalidates posts missing required fields', function () {
         'author' => 'Sarah Johnson',
         'category' => 'Code',
         'date' => NULL, // Null date
-    ]];
-    foreach ($invalidPosts as $invalidPost) {
-        expect(PostService::isValidPost($invalidPost))->toBeFalse();    
-    }
+    ]]);
+
+    $invalidPosts
+        ->mapInto(PostResource::class)
+        ->each(fn (PostResource $post) => expect(PostService::isValidPost($post))->toBeFalse());
 });
 
 test('invalidates posts having miss-shaped fields', function () {
     $tooLong = fake()->text(500);
 
-    $invalidPosts = [[
+    $invalidPosts = collect([[
         'id' => 'a1', // Not a numeric Id
         'title' => 'Valid title',
         'content' => 'Something',
@@ -117,8 +119,9 @@ test('invalidates posts having miss-shaped fields', function () {
         'author' => 'Sarah Johnson',
         'category' => 'Code',
         'date' => 'Not a date', // Not a date
-    ]];
-    foreach ($invalidPosts as $invalidPost) {
-        expect(PostService::isValidPost($invalidPost))->toBeFalse();    
-    }
+    ]]);
+
+    $invalidPosts
+        ->mapInto(PostResource::class)
+        ->each(fn (PostResource $post) => expect(PostService::isValidPost($post))->toBeFalse());
 });

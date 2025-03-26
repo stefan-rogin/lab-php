@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Category;
 use App\Models\Post;
+use App\Http\Resources\PostResource;
 
 class PostService {
 
-    // TODO: Url class available?
     private string $url;
 
     public function __construct(string $url) {
@@ -21,43 +21,41 @@ class PostService {
     public function fetchPosts(): bool {
         $response = Http::acceptJson()->get($this->url);
         if ($response->successful()) {
-            $data = $response->json();
-            if (is_array($data)) {
-                foreach ($data as $post) {
-                    if (self::isValidPost($post)) {
-                        DB::beginTransaction();
-                        try {
-                            $category = Category::firstOrCreate([
-                                'name' => $post['category'],
-                            ]);
-                            $category->posts()->firstOrCreate([
-                                'id' => $post['id'],
-                            ], [
-                                'title' => $post['title'],
-                                'content' => $post['content'],
-                                'author' => $post['author'],
-                                'date' => $post['date'],
-                                'category_id' => $category->id,
-                            ]);    
-                            DB::commit();
-                        } catch (Exception $e) {
-                            Log::error('Failed to store post: '.$post['id'], $e->getMessage());
-                            DB::rollBack();
-                        }
-                    } else {
-                        Log::notice('Invalid post found: '.$post['id']);
-                    }
+            $data = $response
+                ->collect()
+                ->mapInto(PostResource::class)
+                ->filter(fn (PostResource $post) => self::isValidPost($post));
+
+            $data->each(function (PostResource $post) {
+                DB::beginTransaction();
+                try {
+                    $category = Category::firstOrCreate([
+                        'name' => $post->resource['category'],
+                    ]);
+                    $category->posts()->firstOrCreate([
+                        'id' => $post->resource['id'],
+                    ], [
+                        'title' => $post->resource['title'],
+                        'content' => $post->resource['content'],
+                        'author' => $post->resource['author'],
+                        'date' => $post->resource['date'],
+                        'category_id' => $category->id,
+                    ]);    
+                    DB::commit();
+                } catch (Exception $e) {
+                    Log::error('Failed to store post: '.$post['id'], $e->getMessage());
+                    DB::rollBack();
                 }
-                return true;    
-            }
+            });
+            return true;
         } else {
-            Log::warning('Failed to fetch posts.');
+            Log::warning('Failed to fetch posts, external service is unavailable.');
         }
         return false;
     }
 
-    public static function isValidPost($post): bool {
-        $validator = Validator::make($post, [
+    public static function isValidPost(PostResource $post): bool {
+        $validator = Validator::make($post->resource, [
             'id' => 'required|integer|min:1',
             'title' => 'required|string|max:255',
             'content' => 'required|string',
