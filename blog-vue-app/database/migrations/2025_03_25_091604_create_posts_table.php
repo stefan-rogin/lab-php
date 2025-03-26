@@ -15,7 +15,7 @@ return new class extends Migration
             $table->integer('id')->unique();
             $table->string('title');
             $table->text('content');
-            $table->date('created_at');
+            $table->date('date');
         });
     }
 

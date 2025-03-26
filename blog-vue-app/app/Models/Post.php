@@ -16,6 +16,6 @@ class Post extends Model
         'id',
         'title',
         'content',
-        'created_at',
+        'date',
     ];
 }

@@ -20,7 +20,7 @@ class PostFactory extends Factory
             'id' => fake()->unique()->randomNumber(3, false),
             'title' => fake()->sentence(),
             'content' => implode('\n', fake()->paragraphs()),
-            'created_at' => fake()->dateTimeThisYear()->format('Y-m-d'),
+            'date' => fake()->dateTimeThisYear()->format('Y-m-d'),
         ];
     }
 }
