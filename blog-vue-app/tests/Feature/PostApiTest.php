@@ -18,9 +18,14 @@ test('fetches and stores valid posts', function() {
     $category = Category::factory()->create(['name' => 'Code']);
     $fakePosts = Post::factory()->count(3)->make()->toArray();
     $fakeResponsePosts = array_map(function($post) use ($category) {
-        unset($post['category_id']);
-        $post['category'] = $category->name;
-        return $post;
+        return  [
+            'id' => $post['id'],
+            'title' => $post['title'],
+            'content' => $post['content'],
+            'author' => $post['author'],
+            'date' => $post['date'],
+            'category' => $category->name,
+        ];
     }, $fakePosts);
 
     Http::fake([
@@ -35,6 +40,7 @@ test('fetches and stores valid posts', function() {
             'id' => $fakePost['id'],
             'title' => $fakePost['title'],
             'content' => $fakePost['content'],
+            'author' => $fakePost['author'],
             'date' => $fakePost['date'],
             'category_id' => $category->id,
         ]);
@@ -47,6 +53,7 @@ test('fetches and stores valid posts, skipping invalid posts', function() {
         'id' => '10',
         'title' => 'Valid Post',
         'content' => 'Something',
+        'author' => 'Sarah Johnson',
         'category' => $category->name,
         'date' => '2025-03-26',
     ]);
@@ -54,6 +61,7 @@ test('fetches and stores valid posts, skipping invalid posts', function() {
         'id' => '1000',
         'title' => 'Invalid Post',
         'content' => 'Something else',
+        'author' => 'Sarah Johnson',
         'category' => $category->name,
         'date' => 'Invalid Date',
     ];
@@ -68,6 +76,7 @@ test('fetches and stores valid posts, skipping invalid posts', function() {
             'id' => $validPost['id'],
             'title' => $validPost['title'],
             'content' => $validPost['content'],
+            'author' => $validPost['author'],
             'date' => $validPost['date'],
             'category_id' => $category->id,
         ]);
@@ -80,7 +89,7 @@ test('responds with error when service fails', function() {
     $this->get('/api/fetchPosts')->assertServerError();
 });
 
-test('responds with fetched posts', function() {
+test('responds with fetched posts and category', function() {
     $fakePosts = Post::factory()->count(5)->create();
     $this->assertDatabaseCount('posts', 5);
     $this->get('/api')
@@ -92,8 +101,9 @@ test('responds with fetched posts', function() {
                     'id' => 'integer',
                     'title' => 'string',
                     'content' => 'string',
+                    'author' => 'string',
                     'date' => 'string',
-                    'category_id' => 'integer',
+                    'category' => 'string',
                 ])
             )
     );

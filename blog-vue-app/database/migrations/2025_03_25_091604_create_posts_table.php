@@ -21,6 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('id')->unique();
             $table->string('title');
             $table->text('content');
+            $table->string('author');
             $table->date('date');
             $table->unsignedInteger('category_id');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');

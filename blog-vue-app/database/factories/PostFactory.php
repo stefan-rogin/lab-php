@@ -21,6 +21,7 @@ class PostFactory extends Factory
             'id' => fake()->unique()->randomNumber(3, false),
             'title' => fake()->sentence(),
             'content' => fake()->text(),
+            'author' => fake()->name(),
             'date' => fake()->dateTimeThisYear()->format('Y-m-d'),
             'category_id' => Category::factory(),
         ];

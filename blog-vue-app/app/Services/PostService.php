@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use App\Models\Category;
 use App\Models\Post;
 
@@ -24,28 +25,33 @@ class PostService {
             if (is_array($data)) {
                 foreach ($data as $post) {
                     if (self::isValidPost($post)) {
-                        DB::transaction(function() use ($post) {
+                        DB::beginTransaction();
+                        try {
                             $category = Category::firstOrCreate([
                                 'name' => $post['category'],
                             ]);
-                            // TODO: Handle same id but different categories?
                             $category->posts()->firstOrCreate([
                                 'id' => $post['id'],
                             ], [
                                 'title' => $post['title'],
                                 'content' => $post['content'],
+                                'author' => $post['author'],
                                 'date' => $post['date'],
                                 'category_id' => $category->id,
                             ]);    
-                        });
+                            DB::commit();
+                        } catch (Exception $e) {
+                            Log::error('Failed to store post: '.$post['id'], $e->getMessage());
+                            DB::rollBack();
+                        }
                     } else {
-                        // Log skipped record
+                        Log::notice('Invalid post found: '.$post['id']);
                     }
                 }
                 return true;    
             }
         } else {
-            // TODO: Log or throw
+            Log::warning('Failed to fetch posts.');
         }
         return false;
     }
@@ -54,9 +60,10 @@ class PostService {
         $validator = Validator::make($post, [
             'id' => 'required|integer|min:1',
             'title' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
             'content' => 'required|string',
+            'author' => 'required|string|max:255',
             'date' => 'required|date',
+            'category' => 'required|string|max:255',
         ]);
         return !$validator->fails();
     }
