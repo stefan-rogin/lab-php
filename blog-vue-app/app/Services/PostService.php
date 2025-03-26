@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Category;
 use App\Models\Post;
 
 class PostService {
@@ -22,13 +24,20 @@ class PostService {
             if (is_array($data)) {
                 foreach ($data as $post) {
                     if (self::isValidPost($post)) {
-                        Post::firstOrCreate([
-                            'id' => $post['id'],
-                        ], [
-                            'title' => $post['title'],
-                            'content' => $post['content'],
-                            'date' => $post['date'],
-                        ]);
+                        DB::transaction(function() use ($post) {
+                            $category = Category::firstOrCreate([
+                                'name' => $post['category'],
+                            ]);
+                            // TODO: Handle same id but different categories?
+                            $category->posts()->firstOrCreate([
+                                'id' => $post['id'],
+                            ], [
+                                'title' => $post['title'],
+                                'content' => $post['content'],
+                                'date' => $post['date'],
+                                'category_id' => $category->id,
+                            ]);    
+                        });
                     } else {
                         // Log skipped record
                     }
@@ -45,6 +54,7 @@ class PostService {
         $validator = Validator::make($post, [
             'id' => 'required|integer|min:1',
             'title' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
             'content' => 'required|string',
             'date' => 'required|date',
         ]);

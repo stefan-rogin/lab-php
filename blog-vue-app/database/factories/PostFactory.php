@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Category;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Post>
@@ -19,8 +20,9 @@ class PostFactory extends Factory
         return [
             'id' => fake()->unique()->randomNumber(3, false),
             'title' => fake()->sentence(),
-            'content' => implode('\n', fake()->paragraphs()),
+            'content' => fake()->text(),
             'date' => fake()->dateTimeThisYear()->format('Y-m-d'),
+            'category_id' => Category::factory(),
         ];
     }
 }
