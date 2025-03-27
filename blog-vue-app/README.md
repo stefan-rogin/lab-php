@@ -14,35 +14,41 @@ In order to run the project, a working Laravel environment is needed.
 
 ### Installation
 
-- Unzip the project
 - Create a MySQL database for the project and, optionally, create a user for the application.
 
-        mysql> create database blog;
-        mysql> create user 'blog-app'@'localhost' identified by '...';
-        mysql> grant all privileges on blog.* to 'blog-app'@'localhost';
+    mysql> create database blog;
+    mysql> create user 'blog-app'@'localhost' identified by '...';
+    mysql> grant all privileges on blog.* to 'blog-app'@'localhost';
+
+- Unzip the project and create a local `.env` file from the template
+
+    $ unzip blog-vue-app.zip
+    $ cd blog-vue-app/
+    $ cp .env.example .env
 
 - Configure `.env` file with the database connection params.
 
-        DB_CONNECTION=mysql
-        DB_HOST=127.0.0.1
-        DB_PORT=3306
-        DB_DATABASE=blog
-        DB_USERNAME=blog-app
-        DB_PASSWORD=...
+    DB_CONNECTION=mysql
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=blog
+    DB_USERNAME=blog-app
+    DB_PASSWORD=...
 
-- Run the initial migration scripts to have the tables created.
+- Install and setup the project, then run the initial migration scripts to have the tables created.
 
-        $ php artisan migrate
+    $ composer install
+    $ php artisan key:generate
+    $ php artisan migrate
+    $ npm install && npm run build
 
 - Start the project in dev mode.
 
-        $ cd blog-vue-app
-        $ npm install && npm run build
-        $ composer run dev
+    $ composer run dev
 
 - Open the project's home page in a browser window and interact with the UI to fetch the external blog posts, then filter through them with the filter input.
 
-        e.g. http://localhost:8000
+    e.g. http://localhost:8000
 
 ## Overview
 
@@ -73,11 +79,11 @@ To run the project tests, use `$ php artisan test`. Optionally, run test with `-
 
 Tests:
 - Feature
-        - `PostApiTest`: Tests for the API controller.
-        - `BlogClientServiceTest`: Tests for the web client service.
-        - `PostServiceTest`: Tests for the import service.
+    - `PostApiTest`: Tests for the API controller.
+    - `BlogClientServiceTest`: Tests for the web client service.
+    - `PostServiceTest`: Tests for the import service.
 - Unit
-        - `PostServiceValidatorTest`: Tests for the PostResource validation.
+    - `PostServiceValidatorTest`: Tests for the PostResource validation.
 
 ### Remarks
 
