@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Category;
 use App\Models\Post;
 
+/**
+ * Tests for the API Controller
+ */
+
 test('responds with success when empty', function () {
     $this->assertDatabaseEmpty('posts')
         ->get('/api')

@@ -7,6 +7,10 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Services\PostService;
 
+/**
+ * Tests for the post importer service
+ */
+
 test('fetches and stores valid posts, then returns true', function () {
     $POST_SERVICE_URL = config('services.post_service.url');
     $category = Category::factory()->create(['name' => 'Code']);

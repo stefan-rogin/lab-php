@@ -5,6 +5,10 @@ use App\Http\Resources\PostResource;
 
 uses(Tests\TestCase::class);
 
+/**
+ * Tests for the PostResource validator
+ */
+
 test('validates ok posts', function () {
     $validPost = new PostResource([
         'id' => 4,
