@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Category;
 use App\Models\Post;
 use App\Http\Resources\PostResource;
+use App\Services\BlogClientService;
 
 /**
  * Service class for fetching and persisting post from the external source.
@@ -16,39 +17,42 @@ use App\Http\Resources\PostResource;
  */
 class PostService {
 
-    // External endpoint URL property.
-    private string $url;
-
+    // Web client for external blog
+    private BlogClientService $client;
 
     /**
      * PostService constructor.
      *
      * @param string $url The URL to be used by the service.
      */
-    public function __construct(string $url) {
-        $this->url = $url;
+    public function __construct(BlogClientService $client) {
+        $this->client = $client;
     }
 
     /**
-     * Fetches posts from the external data source and persists them.
-     * 
-     * @return bool Returns true if posts are successfully fetched, false otherwise.
+     * Imports posts by getting posts from client service and persisting valid ones.
      */
-    public function fetchPosts(): bool {
+    public function import(): bool {
 
-        // Call external service
-        $response = Http::acceptJson()->get($this->url);
+        // Get posts from client
+        $posts = $this->client->fetchPosts();
 
-        if ($response->successful()) {
+        // Import counters for reporting
+        $stats = [
+            'fetched' => 0,
+            'valid' => 0,
+            'imported' => 0,
+        ];
 
-            // Deserialize response as PostResource collection, then filter out invalid posts
-            $data = $response
-                ->collect()
-                ->mapInto(PostResource::class)
-                ->filter(fn (PostResource $post) => self::isValidPost($post));
+        if ($posts) {
+            $stats['fetched'] = $posts->count();
 
-             // Iterate through valid posts   
-            $data->each(function (PostResource $post) {
+            // Ensure that posts are valid
+            $validPosts = $posts->reject(fn (PostResource $post) => !self::isValidPost($post));
+            $stats['valid'] = $validPosts->count();
+
+            // Iterate through valid posts
+            $validPosts->each(function (PostResource $post) {
 
                 // Begin a transaction to avoid creating unnnecessary category records
                 DB::beginTransaction();
@@ -58,7 +62,7 @@ class PostService {
                         'name' => $post->resource['category'],
                     ]);
 
-                    // Create post record if the post id is not already stored
+                    // Create post record if the post Id is not already stored
                     $category->posts()->firstOrCreate([
                         'id' => $post->resource['id'],
                     ], [
@@ -85,6 +89,8 @@ class PostService {
             // Log warning if external service is unavailable, then return false.
             Log::warning('Failed to fetch posts, external service is unavailable.');
         }
+
+        // Return false if unsucccessful
         return false;
     }
 

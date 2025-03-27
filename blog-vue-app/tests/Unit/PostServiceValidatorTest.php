@@ -23,7 +23,7 @@ test('validates ok posts', function () {
 
 test('invalidates posts missing required fields', function () {
     $invalidPosts = collect([[
-        'id' => NULL, // No Id
+        'id' => null, // No Id
         'title' => 'Valid title',
         'content' => 'Something',
         'author' => 'Sarah Johnson',
@@ -63,7 +63,7 @@ test('invalidates posts missing required fields', function () {
         'content' => 'Something',
         'author' => 'Sarah Johnson',
         'category' => 'Code',
-        'date' => NULL, // Null date
+        'date' => null, // Null date
     ]]);
 
     $invalidPosts

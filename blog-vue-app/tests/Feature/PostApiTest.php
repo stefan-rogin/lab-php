@@ -42,7 +42,7 @@ test('responds with success when fetching external posts', function () {
     Http::fake([
         config('services.post_service.url') => Http::response(json_encode([$validPost]), 200),
     ]);
-    $this->post('/api/fetchPosts')->assertOk();
+    $this->post('/api/import')->assertOk();
 
     $this->assertDatabaseCount('posts', 1)
         ->assertDatabaseHas('posts', [
@@ -59,5 +59,5 @@ test('responds with error when external service fails', function () {
     Http::fake([
         config('services.post_service.url') => Http::response('', 500),
     ]);
-    $this->post('/api/fetchPosts')->assertServerError();
+    $this->post('/api/import')->assertServerError();
 });

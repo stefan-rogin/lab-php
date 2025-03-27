@@ -13,25 +13,30 @@ interface Post {
 
 const posts = ref<Post[]>([]);
 const searchQuery = ref("");
+const isImporting = ref(false);
 const isLoading = ref(false);
 
 // Function that retrives from the app's API the currently stored posts
 const fetchStoredPosts = async () => {
+    // Set state to loading while waiting for the operation to finish
+    isLoading.value = true;
+    
     await fetch("/api")
         .then(res => res.json())
         .then(({ data }) => { posts.value = data })
-        .catch(e => console.error("Failed to fetch posts: ", e));
+        .catch(e => console.error("Failed to fetch posts: ", e))
+        .finally(() => { isLoading.value = false }); // Change state to loaded;
 };
 
 // Function for invoking the app's import action
-const triggerFetchPosts = async () => {
-    // Set state to loading while waiting for the operation to finish
-    isLoading.value = true;
+const triggerImport = async () => {
+    // Set state to importing while waiting for the operation to finish
+    isImporting.value = true;
     // Trigger import and retrieve posts once the import is successful
-    await fetch("/api/fetchPosts", { method: "POST" })
+    await fetch("/api/import", { method: "POST" })
         .then(fetchStoredPosts)
         .catch(e => console.error("Failed to fetch posts: ", e))
-        .finally(() => { isLoading.value = false }) // Change state to loaded
+        .finally(() => { isImporting.value = false }); // Change state to imported
 };
 
 // Initial attempt to get already stored posts
@@ -55,11 +60,14 @@ const filteredPosts = computed(() => posts.value.filter(
         <h1 class="text-xl">Blog</h1>
         <p>Simple app built with Laravel and Vue for evaluation purposes.</p>
     </div>
-    <div class="p-8 pt-0">
+    <div v-if="isLoading" class="p-8 pt-0">
+        <p>Loading...</p>
+    </div>
+    <div v-if="!isLoading" class="p-8 pt-0">
         <!-- Only show filter input if the posts list is not empty -->
         <input v-if="posts.length > 0" v-model="searchQuery" type="text" placeholder="Filter..." class="text-black p-1 border-2 border-gray-400 rounded-sm"/>
         <!-- Alternatively, show a button that triggers the import -->
-        <button v-if="posts.length < 1" @click="triggerFetchPosts" :disabled="isLoading" class="text-black p-1 border-2 border-gray-400 rounded-sm px-8">{{ isLoading ? "Loading..." : "Fetch posts" }}</button>
+        <button v-if="posts.length < 1" @click="triggerImport" :disabled="isLoading" class="text-black p-1 border-2 border-gray-400 rounded-sm px-8">{{ isImporting ? "Loading..." : "Import posts" }}</button>
         <ul>
             <li v-for="post in filteredPosts" :key="post.id">
                 <div class="mt-8 mb-4">

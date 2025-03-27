@@ -40,13 +40,13 @@ In order to run the project, a working Laravel environment is needed.
         $ npm install && npm run build
         $ composer run dev
 
-- Open the project's home page in a browser window and interact with the UI to fetch the external blog posts from `https://api.vercel.app/blog`, then filter through them with the filter input.
+- Open the project's home page in a browser window and interact with the UI to fetch the external blog posts, then filter through them with the filter input.
 
-        http://localhost:8000
+        e.g. http://localhost:8000
 
 ## Overview
 
-The application fetches and stores a list of blog entries from `https://api.vercel.app/blog`. The size of the dataset is minimal, therefore no special precautions were taken for their retrieval. The external fetching is performed on demand by a `POST /api/fetchPosts` request to the project's API. 
+The application fetches and stores a list of blog entries from `https://api.vercel.app/blog`. The size of the dataset is minimal, therefore no special precautions were taken for their retrieval. The external fetching is performed on demand by a `POST /api/import` request to the project's API. 
 
 Stored posts are retrievable with a `GET /api` request. Given the size of the dataset, the endpoint responds with all posts, without pagination.
 
@@ -58,7 +58,8 @@ A simple Vue component provides user interface for interacting with the API, sho
 - `App\Http\Resources\PostResource`: Resource definition for posts
 - `App\Models\Category`: Model class for Category 
 - `App\Models\Post`: Model class for Post
-- `App\Services\PostService`: Dedicated service for retrieval and persistence of posts, from the external source
+- `App\Services\PostService`: Service for retrieval and persistence of posts, using a client service
+- `App\Services\BlogClientService`: Web service client for fetching external posts for import
 - `Database\Factories\CategoryFactory`: Factory class for Category
 - `Database\Factories\PostFactory`: Factory class for Post
 - `migrations/2025_03_25_091604_create_posts_table.php`: DB starter migration for posts and categories
@@ -70,13 +71,17 @@ A simple Vue component provides user interface for interacting with the API, sho
 
 To run the project tests, use `$ php artisan test`. Optionally, run test with `--coverage` suffix for coverage reporting (requires debugger).
 
-There are three test classes:
+Tests:
 - Feature
         - `PostApiTest`: Tests for the API controller.
-        - `PostServiceTest`: Tests for the external source import service.
+        - `BlogClientServiceTest`: Tests for the web client service.
+        - `PostServiceTest`: Tests for the import service.
 - Unit
         - `PostServiceValidatorTest`: Tests for the PostResource validation.
 
 ### Remarks
 
-- Authentication was considered out of scope, given that the starter kit comes with a functional solution
+- Authentication was considered out of scope, given that the starter kit comes with a functional solution.
+- Handling char encoding was considered out of scope, given the external service behavior.
+- Pest expectations were preferred, when possible, but the tests use assertions too, generally for DB checks. Consistency within a test case was the most convenient compromise.
+- More detailed explanations of the implementations are found in the code, as comments.

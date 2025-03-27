@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Category;
 use App\Models\Post;
 use App\Services\PostService;
+use App\Services\BlogClientService;
 
 /**
  * Tests for the post importer service
@@ -13,6 +14,7 @@ use App\Services\PostService;
 
 test('fetches and stores valid posts, then returns true', function () {
     $POST_SERVICE_URL = config('services.post_service.url');
+
     $category = Category::factory()->create(['name' => 'Code']);
     $fakePosts = Post::factory()
         ->count(3)
@@ -23,8 +25,9 @@ test('fetches and stores valid posts, then returns true', function () {
         $POST_SERVICE_URL => Http::response($fakePosts, 200),
     ]);
 
-    $service = new PostService($POST_SERVICE_URL);
-    $this->assertTrue($service->fetchPosts());
+    $client = new BlogClientService($POST_SERVICE_URL);
+    $service = new PostService($client);
+    $this->assertTrue($service->import());
 
     $this->assertDatabaseCount('posts', 3);
     $fakePosts->each(fn ($post) => $this->assertDatabaseHas('posts', [
@@ -39,6 +42,7 @@ test('fetches and stores valid posts, then returns true', function () {
 
 test('fetches and stores valid posts, skipping invalid posts, then returns true', function () {
     $POST_SERVICE_URL = config('services.post_service.url');
+    
     $category = Category::factory()->create(['name' => 'Code']);
     $validPost = Post::factory()->make([
         'id' => '10',
@@ -61,8 +65,10 @@ test('fetches and stores valid posts, skipping invalid posts, then returns true'
         $POST_SERVICE_URL => Http::response(json_encode([$validPost, $invalidPost]), 200),
     ]);
 
-    $service = new PostService($POST_SERVICE_URL);
-    $this->assertTrue($service->fetchPosts());
+    $client = new BlogClientService($POST_SERVICE_URL);
+    $service = new PostService($client);
+
+    $this->assertTrue($service->import());
 
     $this->assertDatabaseCount('posts', 1)
         ->assertDatabaseHas('posts', [
@@ -82,6 +88,8 @@ test('returns false when external service fails', function () {
         $POST_SERVICE_URL => Http::response('', 500),
     ]);
 
-    $service = new PostService($POST_SERVICE_URL);
-    $this->assertFalse($service->fetchPosts());
+    $client = new BlogClientService($POST_SERVICE_URL);
+    $service = new PostService($client);
+
+    $this->assertFalse($service->import());
 });

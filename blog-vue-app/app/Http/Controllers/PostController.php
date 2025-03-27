@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\PostService;
+use App\Services\BlogClientService;
 use App\Models\Post;
 use App\Models\Category;
 use App\Http\Resources\PostResource;
@@ -19,15 +20,16 @@ class PostController extends Controller {
      *
      * @return \Illuminate\Http\JsonResponse The JSON response having the operation result.
      */
-    public function fetchPosts(): JsonResponse {
+    public function import(): JsonResponse {
         
-        // Set external endpoint from services config
+        // Set external endpoint in services config
         $POST_SERVICE_URL = config('services.post_service.url');
 
-        // Instantiate a new service for retrieving and storing the posts
-        $service = new PostService($POST_SERVICE_URL);
+        // Create client an importer instances
+        $client = new BlogClientService($POST_SERVICE_URL);
+        $service = new PostService($client);
 
-        if ($service->fetchPosts()) {
+        if ($service->import()) {
             // Respond with success
             return response()->json(['message' => 'Posts fetched.'], 200);    
         }
