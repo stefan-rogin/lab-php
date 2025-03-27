@@ -72,10 +72,10 @@ To run the project tests, use `$ php artisan test`. Optionally, run test with `-
 
 There are three test classes:
 - Feature
-        - `PostApiTest` - Tests for the API controller.
-        - `PostServiceTest` - Tests for the external source import service.
+        - `PostApiTest`: Tests for the API controller.
+        - `PostServiceTest`: Tests for the external source import service.
 - Unit
-        - `PostServiceValidatorTest` - Tests for the PostResource validation.
+        - `PostServiceValidatorTest`: Tests for the PostResource validation.
 
 ### Remarks
 
