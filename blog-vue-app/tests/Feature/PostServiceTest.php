@@ -52,17 +52,20 @@ test('fetches and stores valid posts, skipping invalid posts, then returns true'
         'category' => $category->name,
         'date' => '2025-03-26',
     ]);
-    $invalidPost = [
+    $invalidPosts = [[
         'id' => '1000',
         'title' => 'Invalid Post',
         'content' => 'Something else',
         'author' => 'Sarah Johnson',
         'category' => $category->name,
         'date' => 'Invalid Date',
-    ];
+    ], [
+        'id' => '1000',
+        'title' => 'Incomplete Post',
+    ]];
 
     Http::fake([
-        $POST_SERVICE_URL => Http::response(json_encode([$validPost, $invalidPost]), 200),
+        $POST_SERVICE_URL => Http::response(json_encode([$validPost, $invalidPosts]), 200),
     ]);
 
     $client = new BlogClientService($POST_SERVICE_URL);

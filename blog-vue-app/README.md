@@ -1,6 +1,6 @@
 # Blog App
 
-The demo project is based on Laravel with Vue [starter kit](https://laravel.com/docs/12.x/starter-kits#vue), from which all irrelevant files were removed, including the demo Vue app and most of the styling boilerplate. 
+The demo project is based on Laravel 12.3.0 with Vue [starter kit](https://laravel.com/docs/12.x/starter-kits#vue), from which all irrelevant files were removed, including the demo Vue app and most of the styling boilerplate. 
 
 ## Setup
 
@@ -102,4 +102,5 @@ Tests:
 - Authentication was considered out of scope, given that the starter kit comes with a functional solution.
 - Handling char encoding was considered out of scope, given the external service behavior.
 - Pest expectations were preferred, when possible, but the tests use assertions too, generally for DB checks. Consistency within a test case was the most convenient compromise.
+- The project logs to the default file `storage/logs/laravel.log`.
 - More detailed explanations of the implementations are found in the code, as comments.

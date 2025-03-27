@@ -23,6 +23,9 @@ test('validates ok posts', function () {
 
 test('invalidates posts missing required fields', function () {
     $invalidPosts = collect([[
+        'id' => null, // Missing fields
+        'title' => 'Valid title',
+    ], [
         'id' => null, // No Id
         'title' => 'Valid title',
         'content' => 'Something',

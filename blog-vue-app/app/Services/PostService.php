@@ -52,7 +52,7 @@ class PostService {
             $stats['valid'] = $validPosts->count();
 
             // Iterate through valid posts
-            $validPosts->each(function (PostResource $post) {
+            $validPosts->each(function (PostResource $post) use ($stats) {
 
                 // Begin a transaction to avoid creating unnnecessary category records
                 DB::beginTransaction();
@@ -75,14 +75,17 @@ class PostService {
 
                     // Commit transaction    
                     DB::commit();
+                    $stats['imported']++;
                 } catch (Exception $e) {
                     // Log failure 
-                    Log::error('Failed to store post: '.$post['id'], $e->getMessage());
-                    // then rollback cuurrent iteration.
+                    Log::error("Failed to store post: {$post['id']}", $e->getMessage());
+                    // then rollback current iteration.
                     DB::rollBack();
                 }
             });
 
+            // Log stats
+            Log::info("Import complete. Fetched: {$stats['fetched']}, Valid: {$stats['valid']}, Imported: {$stats['imported']}.");
             // Return true for success
             return true;
         } else {
