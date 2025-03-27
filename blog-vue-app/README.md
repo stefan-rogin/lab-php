@@ -58,7 +58,9 @@ $ composer run dev
 
 - Open the project's home page in a browser window and interact with the UI to fetch the external blog posts, then filter through them with the filter input.
 
+```
 e.g. http://localhost:8000
+```
 
 ## Overview
 
