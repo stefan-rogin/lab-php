@@ -78,6 +78,7 @@ A simple Vue component provides user interface for interacting with the API, sho
 - `App\Models\Post`: Model class for Post
 - `App\Services\PostService`: Service for retrieval and persistence of posts, using a client service
 - `App\Services\BlogClientService`: Web service client for fetching external posts for import
+- `config/services.php`: Configuration for the PostService import
 - `Database\Factories\CategoryFactory`: Factory class for Category
 - `Database\Factories\PostFactory`: Factory class for Post
 - `migrations/2025_03_25_091604_create_posts_table.php`: DB starter migration for posts and categories
