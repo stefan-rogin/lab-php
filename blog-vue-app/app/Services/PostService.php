@@ -44,59 +44,60 @@ class PostService {
             'imported' => 0,
         ];
 
-        if ($posts) {
-            $stats['fetched'] = $posts->count();
-
-            // Ensure that posts are valid
-            $validPosts = $posts->reject(fn (PostResource $post) => !self::isValidPost($post));
-            $stats['valid'] = $validPosts->count();
-
-            // Iterate through valid posts
-            $validPosts->each(function (PostResource $post) use ($stats) {
-
-                // Begin a transaction to avoid creating unnnecessary category records
-                DB::beginTransaction();
-                try {
-                    // Find or create the post's category
-                    $category = Category::firstOrCreate([
-                        'name' => $post->resource['category'],
-                    ]);
-
-                    // Create post record if the post Id is not already stored
-                    $category->posts()->firstOrCreate([
-                        'id' => $post->resource['id'],
-                    ], [
-                        'title' => $post->resource['title'],
-                        'content' => $post->resource['content'],
-                        'author' => $post->resource['author'],
-                        'date' => $post->resource['date'],
-                        'category_id' => $category->id,
-                    ]);
-
-                    // Commit transaction    
-                    DB::commit();
-                    $stats['imported']++;
-                } catch (Exception $e) {
-                    // Log failure 
-                    Log::error("Failed to store post: {$post['id']}", $e->getMessage());
-                    // then rollback current iteration.
-                    DB::rollBack();
-                }
-            });
-
-            // Log stats
-            Log::info("Import complete. Fetched: {$stats['fetched']}, Valid: {$stats['valid']}, Imported: {$stats['imported']}.");
-            // Return true for success
-            return true;
-        } else {
+        if (!$posts) {
             // Log warning if external service is unavailable, then return false.
             Log::warning('Failed to fetch posts, external service is unavailable.');
+            return false;
         }
 
-        // Return false if unsucccessful
-        return false;
+        $stats['fetched'] = $posts->count();
+
+        // Ensure that posts are valid
+        $validPosts = $posts->reject(fn (PostResource $post) => !self::isValidPost($post));
+        $stats['valid'] = $validPosts->count();
+
+        // Iterate through valid posts
+        $validPosts->each(function (PostResource $post) use ($stats) {
+
+            // FIXME: Move to persistence layer
+            // Begin a transaction to avoid creating unnnecessary category records
+            DB::beginTransaction();
+            try {
+                // Find or create the post's category
+                $category = Category::firstOrCreate([
+                    'name' => $post->resource['category'],
+                ]);
+
+                // Create post record if the post Id is not already stored
+                $category->posts()->firstOrCreate([
+                    'id' => $post->resource['id'],
+                ], [
+                    'title' => $post->resource['title'],
+                    'content' => $post->resource['content'],
+                    'author' => $post->resource['author'],
+                    'date' => $post->resource['date'],
+                    'category_id' => $category->id,
+                ]);
+
+                // Commit transaction    
+                DB::commit();
+                $stats['imported']++;
+            } catch (Exception $e) {
+                // Log failure 
+                Log::error("Failed to store post: {$post['id']}", $e->getMessage());
+                // then rollback current iteration.
+                DB::rollBack();
+            }
+        });
+
+        // Log stats
+        Log::info("Import complete. Fetched: {$stats['fetched']}, Valid: {$stats['valid']}, Imported: {$stats['imported']}.");
+        // Return true for success
+        return true;
+
     }
 
+    // FIXME: User form validators
     /**
      * Validation method for posts integrity.
      * 
